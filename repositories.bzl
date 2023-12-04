@@ -2,6 +2,7 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//third_party:protobuf_version.bzl", "PROTOBUF_VERSION")
 load("//java/private:zip_repository.bzl", "zip_repository")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 def contrib_rules_jvm_deps():
     maybe(
@@ -46,12 +47,19 @@ def contrib_rules_jvm_deps():
         path = "@contrib_rules_jvm//java/private:contrib_rules_jvm_deps.zip",
     )
 
+    #    maybe(
+    #        http_archive,
+    #        name = "rules_jvm_external",
+    #        sha256 = "d31e369b854322ca5098ea12c69d7175ded971435e55c18dd9dd5f29cc5249ac",
+    #        strip_prefix = "rules_jvm_external-5.3",
+    #        url = "https://github.com/bazelbuild/rules_jvm_external/releases/download/5.3/rules_jvm_external-5.3.tar.gz",
+    #    )
+
     maybe(
-        http_archive,
+        git_repository,
         name = "rules_jvm_external",
-        sha256 = "d31e369b854322ca5098ea12c69d7175ded971435e55c18dd9dd5f29cc5249ac",
-        strip_prefix = "rules_jvm_external-5.3",
-        url = "https://github.com/bazelbuild/rules_jvm_external/releases/download/5.3/rules_jvm_external-5.3.tar.gz",
+        commit = "9a4aa70bed415dc7b0ab7db7f642fef801dce5cc",
+        remote = "https://github.com/bazelbuild/rules_jvm_external",
     )
 
 def contrib_rules_jvm_gazelle_deps():
