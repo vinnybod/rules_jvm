@@ -1,6 +1,6 @@
-load(":checkstyle_config.bzl", "CheckStyleInfo")
 load("@apple_rules_lint//lint:defs.bzl", "LinterInfo")
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load(":checkstyle_config.bzl", "CheckStyleInfo")
 
 """
 Checkstyle rule implementation
@@ -17,15 +17,37 @@ def _checkstyle_impl(ctx):
     script = "\n".join([
         "#!/usr/bin/env bash",
         "set -o pipefail",
-        "set -e",
+        "set +e",
         "OLDPWD=$PWD",
+        #        "export XML_OUTPUT_FILE=$TEST_UNDECLARED_OUTPUTS_DIR/test.xml",
     ] + maybe_cd_config_dir + [
-        "$OLDPWD/{lib} -f {output_format} -c {config} {srcs} |sed s:$OLDPWD/::g".format(
+        "$OLDPWD/{lib} -f {output_format} -c {config} {srcs} |sed s:$OLDPWD/::g > tmpfile".format(
             lib = info.checkstyle.short_path,
             output_format = output_format,
             config = config.basename,
             srcs = " ".join(["$OLDPWD/" + f.short_path for f in ctx.files.srcs]),
         ),
+        "cat <<EOF > test.xml",
+        "<?xml version='1.0' encoding='UTF-8'?>",
+        "<testsuites>",
+        "<testsuite name='checkstyle' tests='1' failures='0' errors='1' time='0'>",
+        "<testcase name='checkstyle' classname='checkstyle' time='0'>",
+        "<error message='exited with error code 1'></error>",
+        "<system-out>",
+        "<![CDATA[",
+        "$(cat tmpfile)",
+        "]]>",
+        "</system-out>",
+        "</testcase>",
+        "</testsuite>",
+        "</testsuites>",
+        "EOF",
+        "mv test.xml $XML_OUTPUT_FILE",
+
+        # Exit with 1 if there are any errors
+        "if grep -q '<error' tmpfile; then",
+        "  exit 1",
+        "fi",
     ])
     out = ctx.actions.declare_file(ctx.label.name + "exec")
 
