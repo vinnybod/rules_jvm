@@ -14,19 +14,38 @@ def _checkstyle_impl(ctx):
     config_dir = paths.dirname(config.short_path)
     maybe_cd_config_dir = ["cd {}".format(config_dir)] if config_dir else []
 
-    script = "\n".join([
-        "#!/usr/bin/env bash",
-        "set -o pipefail",
-        "set -e",
-        "OLDPWD=$PWD",
-    ] + maybe_cd_config_dir + [
-        "$OLDPWD/{lib} -o /dev/stderr -f {output_format} -c {config} {srcs} |sed s:$OLDPWD/::g".format(
-            lib = info.checkstyle.short_path,
-            output_format = output_format,
-            config = config.basename,
-            srcs = " ".join(["$OLDPWD/" + f.short_path for f in ctx.files.srcs]),
-        ),
-    ])
+    script = "\n".join(
+        [
+            "#!/usr/bin/env bash",
+            "set -o pipefail",
+            "set +e",
+            "status=0",
+            "OLDPWD=$PWD",
+        ] + maybe_cd_config_dir + [
+            "$OLDPWD/{lib} -o output.txt -f {output_format} -c {config} {srcs} |sed s:$OLDPWD/::g || status=$?".format(
+                lib = info.checkstyle.short_path,
+                output_format = output_format,
+                config = config.basename,
+                srcs = " ".join(["$OLDPWD/" + f.short_path for f in ctx.files.srcs]),
+            ),
+            "echo 'HELLO WORLD'",
+            "echo $XML_OUTPUT_FILE",
+            "cat <<EOF > test.xml",
+            "<?xml version='1.0' encoding='UTF-8'?>",
+            "<testsuites>",
+            "<testsuite name='checkstyle' tests='1' failures='0' errors='1' time='0'>",
+            "<testcase name='checkstyle' classname='checkstyle' time='0'>",
+            "<error message='Example Error Message. If you are seeing, this, my test worked.'>",
+            "<![CDATA[" + "$(cat output.txt)" + "]]>",
+            "</error>",
+            "</testcase>",
+            "</testsuite>",
+            "</testsuites>",
+            "EOF",
+            "mv test.xml $XML_OUTPUT_FILE",
+            "exit $status",
+        ],
+    )
     out = ctx.actions.declare_file(ctx.label.name + "exec")
 
     ctx.actions.write(
