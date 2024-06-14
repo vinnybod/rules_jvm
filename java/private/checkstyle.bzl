@@ -20,7 +20,7 @@ def _checkstyle_impl(ctx):
         "set -e",
         "OLDPWD=$PWD",
     ] + maybe_cd_config_dir + [
-        "$OLDPWD/{lib} -f {output_format} -c {config} {srcs} |sed s:$OLDPWD/::g".format(
+        "$OLDPWD/{lib} -o /dev/stderr -f {output_format} -c {config} {srcs} |sed s:$OLDPWD/::g".format(
             lib = info.checkstyle.short_path,
             output_format = output_format,
             config = config.basename,
