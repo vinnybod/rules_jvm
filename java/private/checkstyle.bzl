@@ -8,7 +8,7 @@ Checkstyle rule implementation
 
 def _checkstyle_impl(ctx):
     info = ctx.attr.config[CheckStyleInfo]
-    name = ctx.name
+    name = ctx.label
     config = info.config_file
     output_format = info.output_format
 
