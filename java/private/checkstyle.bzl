@@ -29,20 +29,35 @@ def _checkstyle_impl(ctx):
                 config = config.basename,
                 srcs = " ".join(["$OLDPWD/" + f.short_path for f in ctx.files.srcs]),
             ),
-            "echo 'HELLO WORLD'",
-            "echo $XML_OUTPUT_FILE",
             "cat <<EOF > test.xml",
-            "<?xml version='1.0' encoding='UTF-8'?>",
-            "<testsuites>",
-            "<testsuite name='" + name + "' tests='1' failures='0' errors='1' time='0'>",
-            "<testcase name='" + name + "' classname='checkstyle' time='0'>",
-            "<error message='Example Error Message. If you are seeing, this, my test worked.'>",
-            "<![CDATA[" + "$(cat output.txt)" + "]]>",
-            "</error>",
-            "</testcase>",
-            "</testsuite>",
-            "</testsuites>",
-            "EOF",
+            '''
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite tests="325" failures="30799">
+<testcase classname="/Users/fzakaria/code/github.com/confluentinc/ce-kafka/./ce-broker-plugins/src/test/resources/log4j.properties" name="/Users/fzakaria/code/github.com/confluentinc/ce-kafka/./ce-broker-plugins/src/test/resources/log4j.properties">
+</testcase>
+<testcase classname="/Users/fzakaria/code/github.com/confluentinc/ce-kafka/./ce-broker-plugins/src/test/java/io/confluent/security/auth/oauth/mockserver/MockOAuthTests.java" name="/Users/fzakaria/code/github.com/confluentinc/ce-kafka/./ce-broker-plugins/src/test/java/io/confluent/security/auth/oauth/mockserver/MockOAuthTests.java">
+<failure type="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocPackageCheck">Line 1: Missing package-info.java file. See https://www.shellcheck.net/wiki/awl.tools.checkstyle.checks.javadoc.JavadocPackageCheck</failure>
+<failure type="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck">Line 30: Line is longer than 80 characters (found 84). See https://www.shellcheck.net/wiki/awl.tools.checkstyle.checks.sizes.LineLengthCheck</failure>
+<failure type="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocVariableCheck">Line 30: Missing a Javadoc comment. See https://www.shellcheck.net/wiki/awl.tools.checkstyle.checks.javadoc.JavadocVariableCheck</failure>
+<failure type="com.puppycrawl.tools.checkstyle.checks.naming.ConstantNameCheck">Line 30: Name 'log' must match pattern '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'. See https://www.shellcheck.net/wiki/awl.tools.checkstyle.checks.naming.ConstantNameCheck</failure>
+<failure type="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocVariableCheck">Line 32: Missing a Javadoc comment. See https://www.shellcheck.net/wiki/awl.tools.checkstyle.checks.javadoc.JavadocVariableCheck</failure>
+<failure type="com.puppycrawl.tools.checkstyle.checks.FinalParametersCheck">Line 230: Parameter resourceType should be final. See https://www.shellcheck.net/wiki/awl.tools.checkstyle.checks.FinalParametersCheck</failure>
+</testcase>
+</testsuite>
+EOF
+''',
+
+            #            "<?xml version='1.0' encoding='UTF-8'?>",
+            #            "<testsuites>",
+            #            "<testsuite name='" + name + "' tests='1' failures='0' errors='1'>",
+            #            "<testcase name='" + name + "'>",
+            #            "<error message=''>",
+            #            "<![CDATA[" + "$(cat output.txt)" + "]]>",
+            #            "</error>",
+            #            "</testcase>",
+            #            "</testsuite>",
+            #            "</testsuites>",
+            #            "EOF",
             "if [ $status -ne 0 ]; then",
             "  mv test.xml $XML_OUTPUT_FILE",
             "fi",
