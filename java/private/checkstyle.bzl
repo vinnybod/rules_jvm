@@ -8,6 +8,7 @@ Checkstyle rule implementation
 
 def _checkstyle_impl(ctx):
     info = ctx.attr.config[CheckStyleInfo]
+    name = ctx.name
     config = info.config_file
     output_format = info.output_format
 
@@ -33,8 +34,8 @@ def _checkstyle_impl(ctx):
             "cat <<EOF > test.xml",
             "<?xml version='1.0' encoding='UTF-8'?>",
             "<testsuites>",
-            "<testsuite name='checkstyle' tests='1' failures='0' errors='1' time='0'>",
-            "<testcase name='checkstyle' classname='checkstyle' time='0'>",
+            "<testsuite name='" + name + "' tests='1' failures='0' errors='1' time='0'>",
+            "<testcase name='" + name + "' classname='checkstyle' time='0'>",
             "<error message='Example Error Message. If you are seeing, this, my test worked.'>",
             "<![CDATA[" + "$(cat output.txt)" + "]]>",
             "</error>",
@@ -42,7 +43,9 @@ def _checkstyle_impl(ctx):
             "</testsuite>",
             "</testsuites>",
             "EOF",
-            "mv test.xml $XML_OUTPUT_FILE",
+            "if [ $status -ne 0 ]; then",
+            "  mv test.xml $XML_OUTPUT_FILE",
+            "fi",
             "exit $status",
         ],
     )
